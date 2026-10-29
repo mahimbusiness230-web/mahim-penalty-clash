@@ -22,6 +22,15 @@ jobs:
           mkdir -p www && cp index.html www/
           npx cap init "Penalty Clash" com.mahimstudio.penaltyclash2 --web-dir www
           npx cap add android
+          which convert || sudo apt-get install -y imagemagick
+          RES=android/app/src/main/res
+          for d in mdpi:48:108 hdpi:72:162 xhdpi:96:216 xxhdpi:144:324 xxxhdpi:192:432; do
+            IFS=: read n s f <<< "$d"
+            convert icon.png -resize ${s}x${s} $RES/mipmap-$n/ic_launcher.png
+            convert icon.png -resize ${s}x${s} $RES/mipmap-$n/ic_launcher_round.png
+            convert icon.png -resize $((f*72/100))x$((f*72/100)) -background none -gravity center -extent ${f}x${f} $RES/mipmap-$n/ic_launcher_foreground.png
+          done
+          sed -i 's/#FFFFFF/#0b5d2a/I' $RES/values/ic_launcher_background.xml
           sed -i 's/<activity/<activity android:screenOrientation="portrait"/' android/app/src/main/AndroidManifest.xml
           sed -i 's|</manifest>|<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/><uses-permission android:name="android.permission.VIBRATE"/></manifest>|' android/app/src/main/AndroidManifest.xml
           cat > android/app/src/main/java/com/mahimstudio/penaltyclash2/MainActivity.java <<'EOT'
